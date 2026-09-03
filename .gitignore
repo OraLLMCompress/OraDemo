@@ -1,0 +1,31 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js build output
+/.next/
+/out/
+/build
+next-env.d.ts
+
+# production / misc
+*.tsbuildinfo
+.vercel
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files — hold the endpoint tokens, must never be committed
+.env
+.env.local
+.env*.local
+
+# os
+.DS_Store
+*.pem
+
+# stray dev-server logs
+nohup.out

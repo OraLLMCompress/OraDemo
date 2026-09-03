@@ -1,0 +1,513 @@
+:root {
+  --violet: #683dff;
+  --violet-30: #d8cdff;
+  --black: #0c0d0d;
+  --white: #ffffff;
+  --gray-dark: #616161;
+  --gray: #bdbdbd;
+  --gray-soft: #e0e0e0;
+  --gray-light: #f5f5f5;
+  --ink: var(--black);
+  --muted: var(--gray-dark);
+  --line: var(--gray-soft);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--white);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App shell: fixed to the viewport height. The title, column headers and
+   composer stay put; only each column's thread scrolls. */
+.wrap {
+  max-width: 1080px;
+  height: 100dvh;
+  margin: 0 auto;
+  padding: 32px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Branded top bar — a dark, softly glowing band on the light page. */
+.topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding: 15px 22px;
+  border-radius: 18px;
+  color: var(--white);
+  background:
+    radial-gradient(140% 200% at 0% 0%, rgba(104, 61, 255, 0.28) 0%, rgba(104, 61, 255, 0) 42%),
+    var(--black);
+  box-shadow: 0 12px 34px rgba(104, 61, 255, 0.16);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  display: block;
+  filter: drop-shadow(0 0 12px rgba(104, 61, 255, 0.55));
+}
+
+.brand-name {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  padding-right: 2px;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.titles h1 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.titles .sub {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.ghost {
+  flex-shrink: 0;
+  margin-left: auto;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  padding: 8px 14px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.ghost:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: var(--white);
+}
+
+.composer {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 12px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(12, 13, 13, 0.08);
+}
+
+.composer textarea {
+  flex: 1;
+  resize: none;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+  background: transparent;
+}
+
+.composer button {
+  border: none;
+  border-radius: 14px;
+  padding: 0 26px;
+  background: var(--violet);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.composer button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.grid {
+  flex: 1;
+  min-height: 0; /* allow the columns (and their threads) to scroll instead of growing the page */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 20px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* let wide code boxes scroll instead of stretching the column */
+  min-height: 0;
+  overflow: hidden;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+}
+
+.col.violet {
+  border-color: var(--violet-30);
+}
+
+.col-head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.col-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gray);
+}
+
+.col.violet .dot {
+  background: var(--violet);
+}
+
+/* Pulse the status dot while a column is generating. */
+.dot.live {
+  animation: pulse-gray 1.3s ease-in-out infinite;
+}
+
+.col.violet .dot.live {
+  animation: pulse-violet 1.3s ease-in-out infinite;
+}
+
+@keyframes pulse-violet {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(104, 61, 255, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(104, 61, 255, 0);
+  }
+}
+
+@keyframes pulse-gray {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(97, 97, 97, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(97, 97, 97, 0);
+  }
+}
+
+.weight-badge {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--gray-light);
+  color: var(--gray-dark);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.col.violet .weight-badge {
+  background: var(--violet-30);
+  color: var(--violet);
+}
+
+.body {
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+/* Markdown-rendered output */
+.body > :first-child {
+  margin-top: 0;
+}
+
+.body > :last-child {
+  margin-bottom: 0;
+}
+
+.body p {
+  margin: 0 0 12px;
+}
+
+.body h1,
+.body h2,
+.body h3,
+.body h4 {
+  margin: 20px 0 10px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.body h1 {
+  font-size: 22px;
+}
+.body h2 {
+  font-size: 19px;
+}
+.body h3 {
+  font-size: 17px;
+}
+.body h4 {
+  font-size: 15px;
+}
+
+.body ul,
+.body ol {
+  margin: 0 0 12px;
+  padding-left: 22px;
+}
+
+.body li {
+  margin: 4px 0;
+}
+
+.body li > p {
+  margin: 0;
+}
+
+.body a {
+  color: var(--violet);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.body strong {
+  font-weight: 600;
+}
+
+.body blockquote {
+  margin: 0 0 12px;
+  padding: 2px 14px;
+  border-left: 3px solid var(--gray-soft);
+  color: var(--muted);
+}
+
+/* Inline code */
+.body code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.88em;
+  background: var(--gray-light, #f5f5f5);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.1em 0.4em;
+}
+
+/* Code blocks */
+.body pre {
+  margin: 0 0 14px;
+  max-width: 100%;
+  padding: 14px 16px;
+  overflow-x: auto;
+  background: #f6f8fa;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  line-height: 1.5;
+}
+
+.body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+}
+
+.body table {
+  width: 100%;
+  margin: 0 0 14px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.body th,
+.body td {
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.body th {
+  background: var(--gray-light, #f5f5f5);
+  font-weight: 600;
+}
+
+.body hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 18px 0;
+}
+
+.caret {
+  display: inline-block;
+  width: 8px;
+  height: 18px;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--violet);
+  animation: blink 1s steps(2) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Conversation thread — the only scrolling region in a column */
+.thread {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-right: 6px;
+  scroll-padding-bottom: 8px;
+  overscroll-behavior: contain;
+}
+
+.placeholder {
+  margin: 0;
+  color: var(--gray);
+  font-size: 15px;
+}
+
+.turn.user {
+  align-self: flex-end;
+  max-width: 88%;
+  padding: 10px 14px;
+  border-radius: 14px 14px 4px 14px;
+  background: var(--gray-light);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+}
+
+.turn.assistant {
+  align-self: stretch;
+  min-width: 0;
+}
+
+.turn-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.turn-stats strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+/* Always reserve the reveal's row so it doesn't resize the columns (and knock
+   the pinned thread off its footer) when it appears once both sides finish. */
+.reveal-slot {
+  flex-shrink: 0;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reveal {
+  margin: 0;
+  text-align: center;
+  font-size: 17px;
+  color: var(--muted);
+  animation: rise 0.4s ease both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal .big {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--violet);
+  letter-spacing: -0.02em;
+  vertical-align: -2px;
+}
+
+.err {
+  margin-top: 8px;
+  color: #b00020;
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  /* Too tall for a fixed two-pane shell on a phone — let the page scroll. */
+  .wrap {
+    height: auto;
+    overflow: visible;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+  .col {
+    overflow: visible;
+    min-height: 320px;
+  }
+  .thread {
+    overflow-y: visible;
+  }
+}
